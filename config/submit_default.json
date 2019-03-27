@@ -1,0 +1,23 @@
+{
+    "SOURCE": "/cvmfs/annie.opensciencegrid.org/setup_annie.sh",
+    "PROD_OPTION": "Analysis",
+    "TOOLANALYSISCONFIGNAME": "TATemplates/PhaseIIReco",
+    "OUTPUT_DIRECTORY": "/annie/app/users/pershint/",
+    "RESOURCE_USES": [
+        "DEDICATED",
+        "OPPORTUNISTIC",
+        "OFFSITE"
+    ],
+    "INPUT_FILES": [
+        "tester.txt",
+        "tester2.txt"
+    ],
+    "OUTPUT_FILES": [
+        "myoutput.root"
+    ],
+    "TA_REPLACEMENTS": {
+        "#INPUT_FILE_PMT#": "tester.txt",
+        "#INPUT_FILE_LAPPD#": "tester2.txt",
+        "#OUTPUT_FILE_TREE": "myoutput.root"
+    }
+}

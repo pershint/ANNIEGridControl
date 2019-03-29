@@ -1,1 +1,5 @@
 *.pyc
+TAConfig_out/*Config
+TAConfig_out/*tar.gz
+TAConfig_out/README.md
+script_out/*.sh

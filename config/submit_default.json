@@ -16,10 +16,5 @@
             "OFFSITE"
         ]
     },
-    "TOOLANALYSISCONFIGNAME": "TATemplates/PhaseIIReco",
-    "TA_REPLACEMENTS": {
-        "#INPUT_FILE_PMT#": "tester.txt",
-        "#INPUT_FILE_LAPPD#": "tester2.txt",
-        "#OUTPUT_FILE_TREE": "myoutput.root"
-    }
+    "TOOLANALYSISCONFIGNAME": "TATemplates/PhaseIIReco"
 }

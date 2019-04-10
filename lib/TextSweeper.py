@@ -20,6 +20,7 @@ class TextSweeper(object):
     def OpenJSON(self,loc):
         with open(loc,"r") as f:
             self.scandict = json.load(loc)
+            print("SCANDICT IS: " + str(self.scandict))
 
     def ReplaceInFile(self,infile,outfile):
         '''Given an input file, open the file and replace any keys in
@@ -30,6 +31,7 @@ class TextSweeper(object):
             newfile = []
             for l in oldfile:
                 for key in self.scandict:
+                    print("KEY IN SCANDICT: " + str(key))
                     if l.find(key)!=-1:
                         l=l.replace(key,self.scandict[key])
                 newfile.append(l)

@@ -18,7 +18,17 @@ if __name__=='__main__':
     #Open the configuration dictionary
     with open(ap.args.CONFIG,"r") as f:
         ourconfig = json.load(f)
-
+    if ap.args.RESET:
+        configs_toclear = glob.glob("%s/*"%(OUTCONFIGPATH))
+        scripts_toclear = glob.glob("%s/*"%(OUTSCRIPTPATH))
+        clears = configs_toclear + scripts_toclear
+        for f in clears:
+            shutil.rmtree(f)
+        sys.exit(0)
+    if args.REPLACEMENTRULE is None:
+        print(("You must specify a replacement rule; necessary for ANNIEGridControl "+
+              "to know how the keyinputs and inputdirs are used"))
+        sys.exit(1)
 
     #Parse input directories
     inputdirs = {}
@@ -29,23 +39,23 @@ if __name__=='__main__':
             
     #Fill in the input/output files on the ToolAnalysis config template
     replacements = [{}]
-    try:
-        replacements = [ourconfig["TA_REPLACEMENTS"]]
-    except KeyError:
-        print("NOTICE: No file replacements in loaded config.  Need to add a replacement"+\
-                " rule, or no replacements are being made")
+    input_file_arrays = []
     if ap.args.REPLACEMENTRULE is not None:
-        replacements = rp.GetReplacementDicts(ap.args.REPLACEMENTRULE,inputdirs)
+        replacements,input_file_arrays = rp.GetReplacementDicts(ap.args.REPLACEMENTRULE,inputdirs)
 
     for j,replacement_dict in enumerate(replacements):
+        configtarname = "%s/config_tar_job_%i.tar.gz"%(ThisJobOutputDir,j)
+        input_files = input_file_arrays[j]
+        input_files.append(configtarname)
         print("REPLACEMENT DICT: " + str(replacement_dict))
         ThisJobOutputDir = "%s/jobsubmit_%i"%(OUTCONFIGPATH,j)
+        ThisScriptOutputDir = "%s/jobsubmit_%i"%(OUTSCRIPTPATH,j)
         TASweeper = ts.TextSweeper(scandict=replacement_dict)
         configtemp = ourconfig["TOOLANALYSISCONFIGNAME"]
         TASweeper.ReplaceInDirectoryFiles("%s/%s"%(CONFIGPATH,configtemp),
                                           ThisJobOutputDir)
         #Tar up the configs
-        with tarfile.open("%s/config_tar.tar.gz"%(ThisJobOutputDir),"w:gz") as tar:
+        with tarfile.open(configtarname,"w:gz") as tar:
             tar.add(OUTCONFIGPATH, arcname=os.path.basename(ThisJobOutputDir))
         if ap.args.NOSAVE:
             contents = glob.glob("%s/*"%(ThisJobOutputDir))
@@ -53,4 +63,6 @@ if __name__=='__main__':
 
         #Now, lets test our script writers
         sw.WriteTAScript("./script_out/TAjobtest_%i.sh"%(j),ourconfig)
-        sw.WriteJobSubmission("./script_out/submittest_%i.sh"%(j),"./TAjobtest.sh",ourconfig)
+        sw.WriteJobSubmission("%s/submittest_%i.sh"%(ThisScriptOutputDir,j),
+                              "%s/TAjobtest_%i.sh"%(ThisScriptOutputDir,j),
+                              ourconfig,input_files)

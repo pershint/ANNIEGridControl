@@ -31,7 +31,6 @@ class TextSweeper(object):
             newfile = []
             for l in oldfile:
                 for key in self.scandict:
-                    print("KEY IN SCANDICT: " + str(key))
                     if l.find(key)!=-1:
                         l=l.replace(key,self.scandict[key])
                 newfile.append(l)

@@ -1,7 +1,7 @@
 #Functions used to write particular types of bash scripts used
 #in grid submission
 
-def WriteJobSubmission(fileloc,jobsubmitscript,configdict):
+def WriteJobSubmission(fileloc,jobsubmitscript,configdict,input_files):
     '''Write out the full TA script using the details given within
     the input configuration file
     Inputs: 
@@ -16,6 +16,10 @@ def WriteJobSubmission(fileloc,jobsubmitscript,configdict):
           Configuration dictionary that contains details necessary for 
           successful job submission.  See config/submit_default.json for
           an example of a configuration dictionary.
+
+          input_files [array]
+          Array of strings with the names of files to give as input when
+          running the job
     '''
     ourfile = open(fileloc,"w")
     ourfile.write("source %s\n\n"%(configdict["GRIDSOURCE"]))
@@ -35,15 +39,13 @@ def WriteJobSubmission(fileloc,jobsubmitscript,configdict):
             flags+=" "
         elif key == "output_directory":
             flags+="-d OUTPUT %s "%(subdetails[key])
-        elif key == "input_files":
-            if len(subdetails[key])>0:
-                for f in subdetails[key]:
-                    flags+="-f %s "%(f)
         else:
             flags+="--%s=%s "%(key,subdetails[key])
         if newline:
             flags+="\\\n"
         newline = not newline
+    for entry in input_files:
+        flags+="-f %s "%(entry)
     submitline = "jobsub_submit %s"%(flags)
     submitline += "file://%s"%(jobsubmitscript)
     ourfile.write(submitline)
@@ -60,7 +62,8 @@ def WriteTAScript(fileloc,configdict):
           configdict [dictionary]
           Configuration dictionary that contains details necessary for 
           successful job submission.  See config/submit_default.json for
-          an example of a configuration dictionary.'''
+          an example of a configuration dictionary.
+    '''
     ourfile = open(fileloc,"w")
     ourfile.write("source %s\n\n"%(configdict["GRIDSOURCE"]))
     comment1=("#Touch a dummy file in the working directory. \n"+

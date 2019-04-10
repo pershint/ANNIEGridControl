@@ -13,6 +13,8 @@ parser.add_argument('-n','--nosaveconfigs', dest='NOSAVE',action='store_true',
         help='Choose whether or not to save all TAConfigs submitted to grid')
 parser.add_argument('-c','--configfile', dest='CONFIG',action='store',type=str,
         help='Path to configuration file used to generate job scripts')
+parser.add_argument('-R','--resetscripts', dest='RESET',action='store_true',
+        help='Remove all files in script and ToolAnalysis config directories')
 parser.add_argument('--keyinput', dest='KEYINPUT', action='store',nargs="+",
         help='Specify a key found in your config files; replace it with the' + \
                 ' second input (usage: --inputfiles #CONFIG_INPUT# file2.txt')
@@ -26,11 +28,7 @@ parser.add_argument('-r','--replacerule', dest='REPLACEMENTRULE', action='store'
 
 defcon = "%s/submit_default.json"%(configpath)
 
-parser.set_defaults(DEBUG=False,CONFIG=defcon, KEYINPUT=None,INPUTDIRS=None,
+parser.set_defaults(DEBUG=False,CONFIG=defcon, RESET=False,KEYINPUT=None,INPUTDIRS=None,
         NOSAVE=False,REPLACEMENTRULE=None)
 args = parser.parse_args()
 
-if args.REPLACEMENTRULE is None:
-    print(("You must specify a replacement rule; necessary for ANNIEGridControl "+
-          "to know how the keyinputs and inputdirs are used"))
-    sys.exit(1)

@@ -49,11 +49,16 @@ def GetReplacementDicts(ruleInput, *argv):
             print("WARNING: No PMT/LAPPD file matches found for processing!")
             return None
         replacement_dicts = []
+        input_file_arrays = []
+        print("FILEPAIRS ARE: " + str(file_pairs))
         for apair in file_pairs:
+            input_files=[]
             replacement_dict = {}
             replacement_dict[PMT_ReplacementKey] = apair[0]
             replacement_dict[LAPPD_ReplacementKey] = apair[1]
+            input_files.append(apair[0])
+            input_files.append(apair[1])
+            input_file_arrays.append(input_files)
             replacement_dict[OutputKey] = apair[2]
             replacement_dicts.append(replacement_dict)
-        return replacement_dicts
-
+        return replacement_dicts, input_file_arrays

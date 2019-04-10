@@ -6,10 +6,6 @@
         "disk": "20GB",
         "expected-lifetime": "8h",
         "output_directory": "./",
-        "input_files": [
-            "tester.txt",
-            "tester2.txt"
-        ],
         "resource-provides": [
             "DEDICATED",
             "OPPORTUNISTIC",

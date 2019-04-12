@@ -3,4 +3,4 @@
 
 verbose 1
 
-InputFile #INPUT_FILE_PMT#
+InputFile INPUT_FILE_PMT

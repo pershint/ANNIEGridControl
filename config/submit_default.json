@@ -12,5 +12,6 @@
             "OFFSITE"
         ]
     },
-    "TOOLANALYSISCONFIGNAME": "TATemplates/PhaseIIReco"
+    "FILES_FOR_REPLACING": "./TATemplates/PhaseIIReco",
+    "MAIN_PROGRAM": "./Analyse"
 }

@@ -2,7 +2,7 @@
 # all variables retrieved with m_variables.Get() must be defined here!
 
 verbose 0
-InputFile #INPUT_FILE_LAPPD#
+InputFile INPUT_FILE_LAPPD
 # octagonal inner structure radius in m (from drawings 106.64")
 InnerStructureRadius 1.3545
 DrawDebugGraphs 0 # whether to draw TPolyMarker3D's of hits

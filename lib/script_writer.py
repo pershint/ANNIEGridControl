@@ -45,16 +45,17 @@ def WriteJobSubmission(fileloc,jobsubmitscript,configdict,input_files):
             flags+="\\\n"
         newline = not newline
     for entry in input_files:
-        flags+="-f %s "%(entry)
+        flags+="-f %s \\\n"%(entry)
     submitline = "jobsub_submit %s"%(flags)
     submitline += "file://%s"%(jobsubmitscript)
     ourfile.write(submitline)
     ourfile.close()
     
 
-def WriteTAScript(fileloc,configdict):
+def WriteTAJob(fileloc,configdict,infiles):
     '''Write out the full TA script using the details given within
     the input configuration file.
+    Any files ending with tar.gz have a line written to untar them.
       Inputs:
           fileloc [string]
           Specify the location to open the bash script at and ultimate save.
@@ -63,6 +64,10 @@ def WriteTAScript(fileloc,configdict):
           Configuration dictionary that contains details necessary for 
           successful job submission.  See config/submit_default.json for
           an example of a configuration dictionary.
+
+          infiles [array]
+          List of input files that should be in the job running directory.
+          Used to untar ToolAnalysis config files.
     '''
     ourfile = open(fileloc,"w")
     ourfile.write("source %s\n\n"%(configdict["GRIDSOURCE"]))
@@ -73,7 +78,40 @@ def WriteTAScript(fileloc,configdict):
                "_${STEM}_dummy_output \n")
     ourfile.write(dummyline)
     ourfile.write("touch ${DUMMY_OUTPUT_FILE}\n")
-    ourfile.write("tar xfz config_tar.tar.gz\n")
-    ourfile.write("Analyse ./ToolChainConfig")
+    for f in infiles:
+        if f.endswith("tar.gz"):
+            ourfile.write("tar xfz %s\n"%(f))
+    ourfile.write("%s ./ToolChainConfig"%(configdict["MAIN_PROGRAM"]))
+    ourfile.close()
+
+def WriteGenericJob(fileloc,configdict,infiles):
+    '''Write out a generic job script using the input configuration file.
+    Any files ending with tar.gz have a line written to untar them.
+      Args:
+          fileloc [string]
+          Specify the location to open the bash script at and ultimate save.
+          
+          configdict [dictionary]
+          Configuration dictionary that contains details necessary for 
+          successful job submission.  See config/submit_default.json for
+          an example of a configuration dictionary.
+          
+          infiles [array]
+          List of input files that should be in the job running directory.
+          Used to untar ToolAnalysis config files.
+    '''
+    ourfile = open(fileloc,"w")
+    ourfile.write("source %s\n\n"%(configdict["GRIDSOURCE"]))
+    comment1=("#Touch a dummy file in the working directory. \n"+
+              "#This is a hack that helps stalled jobs close faster\n\n")
+    ourfile.write(comment1)
+    dummyline=("DUMMY_OUTPUT_FILE=${CONDOR_DIR_OUTPUT}/${JOBSUBID}"+
+               "_${STEM}_dummy_output \n")
+    ourfile.write(dummyline)
+    ourfile.write("touch ${DUMMY_OUTPUT_FILE}\n")
+    for f in infiles:
+        if f.endswith("tar.gz"):
+            ourfile.write("tar xfz %s\n"%(f))
+    ourfile.write(configdict["MAIN_PROGRAM"])
     ourfile.close()
 

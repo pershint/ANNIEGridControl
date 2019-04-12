@@ -8,29 +8,34 @@ def GetReplacementDicts(ruleInput, *argv):
     '''
     Given a rule input ,
     will produce an array of replacements to make to help produce all configuration
-    files for submitting ToolAnalysis jobs.
+    files for submitting ToolAnalysis jobs.  Assumes 
     Inputs:
-        ruleInput Array
-            Input of the form ["RULENAME", "RULEARG1", "RULEARG2",...].  
+        ruleInput string
+            Setup string given on program execution that indicates what setup of
+            ANNIEGridControl is being executed.
         *argv
             Any additional inputs necessary to form the dictionaries used to make
-            replacements in ToolAnalysis config files.
-    Output array of dictionaries
-        Array of dictionaries.  Each dictionary can be used by the TextSweeper class to replace
-        keys typed into the template config files with the value in the dictionary entry.
+            replacements in input text files (specific to rule: see README for 
+            inputs needed for each setup).
+    Output: array of dictionaries
+        Array of dictionaries. Dictionary is used by TextSweeper class to
+        make text replacements in input files prior to job submission.
     '''
-    if ruleInput[0] == "PMTLAPPDRECO":
-        if len(ruleInput) > 4:
-            print(("Rule LAPPDPMTPAIRS only takes in two directories; the"+
-                   " PMT data directory and the LAPPD data directory."))
-        PMT_ReplacementKey = ruleInput[1]
-        LAPPD_ReplacementKey = ruleInput[2]
-        OutputKey = ruleInput[3]
-        InputDirs = argv[0]
-        if PMT_ReplacementKey in InputDirs:
-            PMTFiles = glob.glob("%s/*.root"%(InputDirs[PMT_ReplacementKey]))
-        if LAPPD_ReplacementKey in InputDirs:
-            LAPPDFiles = glob.glob("%s/*.root"%(InputDirs[LAPPD_ReplacementKey]))
+    if ruleInput == "TOOLANALYSISRECO":
+        if len(argv[0]) != 5:
+            print(("Rule TOOLANALYSISRECO should have 5 inputs on command line:" +
+                   "INPUT_FILE_KEY1 /path/to/pmtdata/ "+
+                   "INPUT_FILE_KEY2 /path/to/lappddata/ "+
+                   "OUTPUT_FILE_KEY"))
+            return None
+        TARecoSetupInputs = argv[0]
+        PMT_ReplacementKey = TARecoSetupInputs[0]
+        PMT_DataDir = TARecoSetupInputs[1]
+        LAPPD_ReplacementKey = TARecoSetupInputs[2]
+        LAPPD_DataDir = TARecoSetupInputs[3]
+        OutputKey = TARecoSetupInputs[4]
+        PMTFiles = glob.glob("%s/*.root"%(PMT_DataDir))
+        LAPPDFiles = glob.glob("%s/*.root"%(LAPPD_DataDir))
         file_pairs = []
         for pf in PMTFiles:
             found_LAPPD_match = False
@@ -46,7 +51,9 @@ def GetReplacementDicts(ruleInput, *argv):
                 print("WARNING: COULD NOT FIND LAPPD PAIR TO PMT FILE %s"%(pf))
 
         if len(file_pairs)==0:
-            print("WARNING: No PMT/LAPPD file matches found for processing!")
+            print(("WARNING: No PMT/LAPPD file matches found for processing!\n"+
+                   "Are your directories defined correctly?  Do PMT(LAPPD)"+
+                   "datafiles have structure wcsim_(lappd_)N1.N2.N3.root?"))
             return None
         replacement_dicts = []
         input_file_arrays = []

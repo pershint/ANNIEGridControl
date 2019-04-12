@@ -6,12 +6,13 @@ import shutil
 import lib.ArgParser as ap
 import lib.TextSweeper as ts
 import lib.script_writer as sw
-import lib.RuleParser as rp #Controls location to save output fit results
+import lib.SetupParser as sp #Controls location to save output fit results
 
 BASEPATH = os.path.dirname(__file__)
 CONFIGPATH = os.path.abspath(os.path.join(BASEPATH, "config"))
-OUTCONFIGPATH = os.path.abspath(os.path.join(BASEPATH,"TAConfig_out"))
-OUTSCRIPTPATH = os.path.abspath(os.path.join(BASEPATH,"script_out"))
+OUTCONFIGPATH = os.path.abspath(os.path.join(BASEPATH,"output","Configured_Files"))
+OUTSCRIPTPATH = os.path.abspath(os.path.join(BASEPATH,"output","Scripts"))
+OUTLOGPATH = os.path.abspath(os.path.join(BASEPATH,"output","JobLogs"))
 
 if __name__=='__main__':
     print("WE BEGIN THE CONTROL")
@@ -25,44 +26,62 @@ if __name__=='__main__':
         for f in clears:
             shutil.rmtree(f)
         sys.exit(0)
-    if args.REPLACEMENTRULE is None:
-        print(("You must specify a replacement rule; necessary for ANNIEGridControl "+
-              "to know how the keyinputs and inputdirs are used"))
-        sys.exit(1)
+    if ap.args.SETUP is None:
+        print(("No specific script setup specified.  Writing sob submission" +
+               " scripts with default grid script structure"))
 
     #Parse input directories
-    inputdirs = {}
-    print("REPRULE: %s"%(str(ap.args.REPLACEMENTRULE)))
-    print("INPUTDIRS: %s"%(str(ap.args.INPUTDIRS)))
-    for j,val in enumerate(ap.args.INPUTDIRS):
-        if (j%2==0): inputdirs[val] = ap.args.INPUTDIRS[j+1]
-            
-    #Fill in the input/output files on the ToolAnalysis config template
-    replacements = [{}]
-    input_file_arrays = []
-    if ap.args.REPLACEMENTRULE is not None:
-        replacements,input_file_arrays = rp.GetReplacementDicts(ap.args.REPLACEMENTRULE,inputdirs)
+    if ap.args.DEBUG:
+        print("SETUP: %s"%(str(ap.args.SETUP)))
+        print("SETUP_INPUTS: \n")
+        print(ap.args.SETUPINPUTS)
 
-    for j,replacement_dict in enumerate(replacements):
-        configtarname = "%s/config_tar_job_%i.tar.gz"%(ThisJobOutputDir,j)
-        input_files = input_file_arrays[j]
-        input_files.append(configtarname)
-        print("REPLACEMENT DICT: " + str(replacement_dict))
-        ThisJobOutputDir = "%s/jobsubmit_%i"%(OUTCONFIGPATH,j)
-        ThisScriptOutputDir = "%s/jobsubmit_%i"%(OUTSCRIPTPATH,j)
+    #Prepare input files
+    input_files = []  
+    for infile in ap.args.FILEINPUT:
+        input_files.append(infile)
+
+
+    #Prepare any replacements to be made in the input files
+    #Or configuration files for each job.
+    replacements = [{}] #Key/value replacements to make
+    if ap.args.SETUP is not None:
+        replacements,setup_infiles = sp.GetReplacementDicts(ap.args.SETUP,
+                                                          ap.args.SETUPINPUTS)
+    for jnum,replacement_dict in enumerate(replacements):
+        if ap.args.DEBUG:
+            print("REPLACEMENT DICT FOR THIS JOB: " + str(replacement_dict))
+        if not replacement_dict:
+            print(("SENDING SINGLE JOB WITH " +
+                   "NO REPLACEMENTS MADE TO INPUT FILES"))
+            jnum = int(ap.args.JOBNUM)
+
+        ThisJobfilesOutputDir = "%s/jobsubmit_%i"%(OUTCONFIGPATH,jnum)
+        tarname = "%s/inputfiles_tar_job_%i.tar.gz"%(ThisJobfilesOutputDir,jnum)
         TASweeper = ts.TextSweeper(scandict=replacement_dict)
-        configtemp = ourconfig["TOOLANALYSISCONFIGNAME"]
-        TASweeper.ReplaceInDirectoryFiles("%s/%s"%(CONFIGPATH,configtemp),
-                                          ThisJobOutputDir)
-        #Tar up the configs
-        with tarfile.open(configtarname,"w:gz") as tar:
-            tar.add(OUTCONFIGPATH, arcname=os.path.basename(ThisJobOutputDir))
-        if ap.args.NOSAVE:
-            contents = glob.glob("%s/*"%(ThisJobOutputDir))
-            [os.remove(c) for c in contents]
-
+        TASweeper.ReplaceInDirectoryFiles("%s/%s"%(CONFIGPATH,ourconfig["FILES_FOR_REPLACING"]),
+                                          ThisJobfilesOutputDir)
+        #Tar up the config
+        with tarfile.open(tarname,"w:gz") as tar:
+            tar.add(OUTCONFIGPATH, arcname=os.path.basename(ThisJobfilesOutputDir))
         #Now, lets test our script writers
-        sw.WriteTAScript("./script_out/TAjobtest_%i.sh"%(j),ourconfig)
-        sw.WriteJobSubmission("%s/submittest_%i.sh"%(ThisScriptOutputDir,j),
-                              "%s/TAjobtest_%i.sh"%(ThisScriptOutputDir,j),
-                              ourconfig,input_files)
+        ThisScriptOutputDir = "%s/jobsubmit_%i"%(OUTSCRIPTPATH,jnum)
+        if not os.path.exists(ThisScriptOutputDir): os.mkdir(ThisScriptOutputDir)
+        jobfilepath = "%s/gridjob_%i.sh"%(ThisScriptOutputDir,jnum)
+        jobsubmitterpath = "%s/jobsubmitter_%i.sh"%(ThisScriptOutputDir,jnum)
+        if ap.args.SETUP is None:
+            input_files.append(tarname)
+            sw.WriteGenericJob(jobfilepath,ourconfig,input_files)
+            sw.WriteJobSubmission(jobsubmitterpath, jobfilepath,
+                                  ourconfig,input_files)
+        elif ap.args.SETUP == "TOOLANALYSISRECO":
+            thisjob_input_files = input_files + setup_infiles[jnum]
+            thisjob_input_files.append(tarname)
+            print(str(thisjob_input_files))
+            sw.WriteTAJob(jobfilepath,ourconfig,input_files)
+            sw.WriteJobSubmission(jobsubmitterpath, jobfilepath,
+                                  ourconfig,thisjob_input_files)
+        if not ap.args.NOSUBMIT:
+            #Now shoot off the job script now.
+            joblogpath = "%s/jobsubmit_log_%i"%(OUTLOGPATH,jnum)
+            os.system("bash %s > %s"%(jobsubmitterpath,joblogpath))

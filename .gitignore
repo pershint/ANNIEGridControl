@@ -1,2 +1,7 @@
 *.pyc
-output/*
+output/JobLogs/*
+!output/JobLogs/.gitkeep
+output/Configured_Files/*
+!output/Configured_Files/.gitkeep
+output/Scripts/*
+!output/Scripts/.gitkeep

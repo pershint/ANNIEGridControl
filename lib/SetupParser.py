@@ -45,6 +45,7 @@ def GetReplacementDicts(ruleInput, *argv):
             if p.find("lappd")!=-1:
                 LAPPDFiles.append(p)
         file_pairs = []
+        input_file_arrays = [] #Holds 2-element arrays with full PMT/LAPPD paths
         for pf in PMTFiles:
             found_LAPPD_match = False
             pf_split = pf.split("_")
@@ -52,6 +53,7 @@ def GetReplacementDicts(ruleInput, *argv):
                 lf_split = lf.split("_")
                 if pf_split[1] == lf_split[2]:
                     outsuffix = lf_split[2]
+                    input_file_arrays.append([pf,lf])
                     apair = [pf.replace(PMT_DataDir,""),
                             lf.replace(LAPPD_DataDir,""),
                             "output_%s"%(outsuffix)]
@@ -65,17 +67,12 @@ def GetReplacementDicts(ruleInput, *argv):
                    "Are your directories defined correctly?  Do PMT(LAPPD)"+
                    "datafiles have structure wcsim_(lappd_)N1.N2.N3.root?"))
             return None
-        replacement_dicts = []
-        input_file_arrays = []
+        replacement_dicts = [] #Replacements made in each job's Config scripts
         print("FILEPAIRS ARE: " + str(file_pairs))
         for apair in file_pairs:
-            input_files=[]
             replacement_dict = {}
             replacement_dict[PMT_ReplacementKey] = apair[0]
             replacement_dict[LAPPD_ReplacementKey] = apair[1]
-            input_files.append(apair[0])
-            input_files.append(apair[1])
-            input_file_arrays.append(input_files)
             replacement_dict[OutputKey] = apair[2]
             replacement_dicts.append(replacement_dict)
         return replacement_dicts, input_file_arrays

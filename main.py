@@ -15,11 +15,15 @@ OUTSCRIPTPATH = os.path.abspath(os.path.join(BASEPATH,"output","Scripts"))
 OUTLOGPATH = os.path.abspath(os.path.join(BASEPATH,"output","JobLogs"))
 
 if __name__=='__main__':
-    print("WE BEGIN THE CONTROL")
+    print("\n#############################################")
+    print("###### INITIALIZING ANNIE GRID CONTROL ######")
+    print("#############################################\n")
+    
     #Open the configuration dictionary
     with open(ap.args.CONFIG,"r") as f:
         ourconfig = json.load(f)
     if ap.args.RESET:
+        print("CLEARING ALL GRID JOB OUTPUTS IN output DIRECTORY")
         configs_toclear = glob.glob("%s/*"%(OUTCONFIGPATH))
         scripts_toclear = glob.glob("%s/*"%(OUTSCRIPTPATH))
         logs_toclear = glob.glob("%s/*"%(OUTLOGPATH))
@@ -54,6 +58,7 @@ if __name__=='__main__':
     for jnum,replacement_dict in enumerate(replacements):
         if ap.args.DEBUG:
             print("REPLACEMENT DICT FOR THIS JOB: " + str(replacement_dict))
+            print("ABSOLUTE PMT/LAPPD FILE PATHS FOR JOB: " + str(setup_infiles))
         if not replacement_dict:
             print(("SENDING SINGLE JOB WITH " +
                    "NO REPLACEMENTS MADE TO INPUT FILES"))

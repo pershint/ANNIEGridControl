@@ -1,0 +1,9 @@
+LoadWCSim LoadWCSim ./LoadWCSimConfig
+LoadWCSimLAPPD LoadWCSimLAPPD ./LoadWCSimLAPPDConfig
+#FindMrdTracks FindMrdTracks ./FindMrdTracksConfig
+DigitBuilder DigitBuilder .//DigitBuilderConfig
+EventSelector EventSelector ./EventSelectorConfig
+VtxSeedGenerator VtxSeedGenerator ./VtxSeedGeneratorConfig
+VtxExtendedVertexFinder VtxExtendedVertexFinder ./VtxExtendedVertexFinderConfig
+PhaseIITreeMaker PhaseIITreeMaker ./PhaseIITreeMakerConfig
+#SaveRecoEvent SaveRecoEvent ./SaveRecoEventConfig

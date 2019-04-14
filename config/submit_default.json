@@ -1,7 +1,7 @@
 {
     "GRIDSOURCE": "/cvmfs/annie.opensciencegrid.org/setup_annie.sh",
     "SUBMISSION_SPECS":{
-        "prod_option": "Analysis",
+        "role": "Analysis",
         "group": "annie",
         "disk": "20GB",
         "expected-lifetime": "8h",

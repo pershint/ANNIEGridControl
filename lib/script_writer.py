@@ -35,7 +35,7 @@ def WriteJobSubmission(fileloc,jobsubmitscript,configdict,input_files):
                 flags+="--%s=usage_model="%(key)
             for resource in subdetails[key]:
                 flags+="%s,"%(resource)
-            flags.rstrip(",")
+            flags = flags.rstrip(",")
             flags+=" "
         elif key == "output_directory":
             flags+="-d OUTPUT %s "%(subdetails[key])

@@ -22,8 +22,11 @@ if __name__=='__main__':
     if ap.args.RESET:
         configs_toclear = glob.glob("%s/*"%(OUTCONFIGPATH))
         scripts_toclear = glob.glob("%s/*"%(OUTSCRIPTPATH))
-        clears = configs_toclear + scripts_toclear
-        for f in clears:
+        logs_toclear = glob.glob("%s/*"%(OUTLOGPATH))
+        dirclears = configs_toclear + scripts_toclear
+        for f in logs_toclear:
+            os.remove(f)
+        for f in dirclears:
             shutil.rmtree(f)
         sys.exit(0)
     if ap.args.SETUP is None:

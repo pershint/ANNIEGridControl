@@ -34,8 +34,16 @@ def GetReplacementDicts(ruleInput, *argv):
         LAPPD_ReplacementKey = TARecoSetupInputs[2]
         LAPPD_DataDir = TARecoSetupInputs[3]
         OutputKey = TARecoSetupInputs[4]
-        PMTFiles = glob.glob("%s/*.root"%(PMT_DataDir))
-        LAPPDFiles = glob.glob("%s/*.root"%(LAPPD_DataDir))
+        prePMTFiles = glob.glob("%s/*.root"%(PMT_DataDir))
+        PMTFiles=[]
+        for p in prePMTFiles:
+            if p.find("lappd")==-1:
+                PMTFiles.append(p)
+        preLAPPDFiles = glob.glob("%s/*.root"%(LAPPD_DataDir))
+        LAPPDFiles=[]
+        for p in preLAPPDFiles:
+            if p.find("lappd")!=-1:
+                LAPPDFiles.append(p)
         file_pairs = []
         for pf in PMTFiles:
             found_LAPPD_match = False
@@ -44,7 +52,9 @@ def GetReplacementDicts(ruleInput, *argv):
                 lf_split = lf.split("_")
                 if pf_split[1] == lf_split[2]:
                     outsuffix = lf_split[2]
-                    apair = [pf,lf,"output_%s"%(outsuffix)]
+                    apair = [pf.replace(PMT_DataDir,""),
+                            lf.replace(LAPPD_DataDir,""),
+                            "output_%s"%(outsuffix)]
                     file_pairs.append(apair)
                     found_LAPPD_match = True
             if not found_LAPPD_match:

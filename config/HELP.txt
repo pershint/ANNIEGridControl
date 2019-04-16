@@ -9,6 +9,9 @@ SUBMISSION_SPECS: key/value pairs that define the flag and value to be
 added in the jobsub_submit command. Default file is set the same as Steven's
 job submission bash script.
 
+Note that the output directory specified will have a separate output directory
+generated for each job submitted.
+
 FILES_FOR_REPLACING: Directory that contains all template text files that have
 entries that need replacing.  For a ToolAnalysis setup, this directory would
 be your tool's configuration files.

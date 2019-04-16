@@ -5,7 +5,7 @@
         "group": "annie",
         "disk": "20GB",
         "expected-lifetime": "8h",
-        "output_directory": "./",
+        "output_directory": "/pnfs/annie/scratch/users/pershint/",
         "resource-provides": [
             "DEDICATED",
             "OPPORTUNISTIC",

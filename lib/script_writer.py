@@ -20,6 +20,9 @@ def WriteJobSubmission(fileloc,jobsubmitscript,configdict,input_files):
           input_files [array]
           Array of strings with the names of files to give as input when
           running the job
+
+          jnum [int]
+          Specifies this job number to label this job's output subdirectory
     '''
     ourfile = open(fileloc,"w")
     ourfile.write("source %s\n\n"%(configdict["GRIDSOURCE"]))
@@ -78,9 +81,17 @@ def WriteTAJob(fileloc,configdict,infiles):
                "_${STEM}_dummy_output \n")
     ourfile.write(dummyline)
     ourfile.write("touch ${DUMMY_OUTPUT_FILE}\n")
+    #Let's save the configfiles untarred in a directory
+    ourfile.write("mkdir ${CONDOR_DIR_OUTPUT}/Config_Used\n")
+    #Untar the file that has all config files in it
     for f in infiles:
         if f.endswith("tar.gz"):
             ourfile.write("tar xfz %s\n"%(f))
+            ourfile.write("cp %s ${CONDOR_DIR_OUTPUT}/Config_Used/\n"%(f))
+    #Whatever temp output directory is used, fill it's path into the Config
+    ourfile.write('sed -i "s|CONDOR_DIR_OUTPUT/${CONDOR_DIR_OUTPUT}|g" *Config\n')
+    ourfile.write("echo 'FILES IN OUR DIRECTORY:'\n")
+    ourfile.write('ls\n')
     ourfile.write("%s ./ToolChainConfig"%(configdict["MAIN_PROGRAM"]))
     ourfile.close()
 
@@ -109,9 +120,14 @@ def WriteGenericJob(fileloc,configdict,infiles):
                "_${STEM}_dummy_output \n")
     ourfile.write(dummyline)
     ourfile.write("touch ${DUMMY_OUTPUT_FILE}\n")
+    #Let's save the configfiles untarred in a directory
+    ourfile.write("mkdir ${CONDOR_DIR_OUTPUT}/Config_Used\n")
     for f in infiles:
         if f.endswith("tar.gz"):
             ourfile.write("tar xfz %s\n"%(f))
+            ourfile.write("cp %s ${CONDOR_DIR_OUTPUT}/Config_Used/\n"%(f))
+    ourfile.write("echo 'FILES IN OUR DIRECTORY:'\n")
+    ourfile.write('ls\n')
     ourfile.write(configdict["MAIN_PROGRAM"])
     ourfile.close()
 

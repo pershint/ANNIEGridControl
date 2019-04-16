@@ -56,7 +56,7 @@ def GetReplacementDicts(ruleInput, *argv):
                     input_file_arrays.append([pf,lf])
                     apair = [pf.replace(PMT_DataDir,""),
                             lf.replace(LAPPD_DataDir,""),
-                            "output_%s"%(outsuffix)]
+                            "CONDOR_DIR_OUTPUT/output_%s"%(outsuffix)]
                     file_pairs.append(apair)
                     found_LAPPD_match = True
             if not found_LAPPD_match:

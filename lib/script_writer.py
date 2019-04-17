@@ -1,7 +1,7 @@
 #Functions used to write particular types of bash scripts used
 #in grid submission
 
-def WriteJobSubmission(fileloc,jobsubmitscript,configdict,input_files):
+def WriteJobSubmission(fileloc,jobsubmitscript,configdict):
     '''Write out the full TA script using the details given within
     the input configuration file
     Inputs: 
@@ -17,7 +17,6 @@ def WriteJobSubmission(fileloc,jobsubmitscript,configdict,input_files):
           successful job submission.  See config/submit_default.json for
           an example of a configuration dictionary.
 
-          input_files [array]
           Array of strings with the names of files to give as input when
           running the job
 
@@ -47,8 +46,6 @@ def WriteJobSubmission(fileloc,jobsubmitscript,configdict,input_files):
         if newline:
             flags+="\\\n"
         newline = not newline
-    for entry in input_files:
-        flags+="-f %s \\\n"%(entry)
     submitline = "jobsub_submit %s"%(flags)
     submitline += "file://%s"%(jobsubmitscript)
     ourfile.write(submitline)
@@ -74,22 +71,27 @@ def WriteTAJob(fileloc,configdict,infiles):
     '''
     ourfile = open(fileloc,"w")
     ourfile.write("source %s\n\n"%(configdict["GRIDSOURCE"]))
+    #ourfile.write("setup ifdhc\n")
+    ourfile.write("setup fife_utils\n")
     comment1=("#Touch a dummy file in the working directory. \n"+
               "#This is a hack that helps stalled jobs close faster\n\n")
     ourfile.write(comment1)
-    dummyline=("DUMMY_OUTPUT_FILE=${CONDOR_DIR_OUTPUT}/${JOBSUBID}"+
-               "_${STEM}_dummy_output \n")
+    dummyline=("DUMMY_OUTPUT_FILE=${CONDOR_DIR_OUTPUT}/__dummy_output \n")
     ourfile.write(dummyline)
     ourfile.write("touch ${DUMMY_OUTPUT_FILE}\n")
     #Let's save the configfiles untarred in a directory
     ourfile.write("mkdir ${CONDOR_DIR_OUTPUT}/Config_Used\n")
+    for entry in infiles:
+        ourfile.write("ifdh cp -D %s .\n"%(entry))
     #Untar the file that has all config files in it
     for f in infiles:
         if f.endswith("tar.gz"):
-            ourfile.write("tar xfz %s\n"%(f))
-            ourfile.write("cp %s ${CONDOR_DIR_OUTPUT}/Config_Used/\n"%(f))
+            localtar_arr = f.split("/")
+            localtar = localtar_arr[len(localtar_arr)-1]
+            ourfile.write("cp %s ${CONDOR_DIR_OUTPUT}/Config_Used/\n"%(localtar))
+            ourfile.write("tar xfz %s\n"%(localtar))
     #Whatever temp output directory is used, fill it's path into the Config
-    ourfile.write('sed -i "s|CONDOR_DIR_OUTPUT/${CONDOR_DIR_OUTPUT}|g" *Config\n')
+    ourfile.write('sed -i "s|CONDOR_DIR_OUTPUT|${CONDOR_DIR_OUTPUT}|g" *Config\n')
     ourfile.write("echo 'FILES IN OUR DIRECTORY:'\n")
     ourfile.write('ls\n')
     ourfile.write("%s ./ToolChainConfig"%(configdict["MAIN_PROGRAM"]))
@@ -109,23 +111,26 @@ def WriteGenericJob(fileloc,configdict,infiles):
           
           infiles [array]
           List of input files that should be in the job running directory.
-          Used to untar ToolAnalysis config files.
+          Used to untar ToolAnalysis config files and get any local files needed.
     '''
     ourfile = open(fileloc,"w")
     ourfile.write("source %s\n\n"%(configdict["GRIDSOURCE"]))
     comment1=("#Touch a dummy file in the working directory. \n"+
               "#This is a hack that helps stalled jobs close faster\n\n")
     ourfile.write(comment1)
-    dummyline=("DUMMY_OUTPUT_FILE=${CONDOR_DIR_OUTPUT}/${JOBSUBID}"+
-               "_${STEM}_dummy_output \n")
+    dummyline=("DUMMY_OUTPUT_FILE=${CONDOR_DIR_OUTPUT}/_dummy_output \n")
     ourfile.write(dummyline)
     ourfile.write("touch ${DUMMY_OUTPUT_FILE}\n")
+    for entry in infiles:
+        ourfile.write("ifdh cp %s .\n"%(entry))
     #Let's save the configfiles untarred in a directory
     ourfile.write("mkdir ${CONDOR_DIR_OUTPUT}/Config_Used\n")
     for f in infiles:
         if f.endswith("tar.gz"):
-            ourfile.write("tar xfz %s\n"%(f))
-            ourfile.write("cp %s ${CONDOR_DIR_OUTPUT}/Config_Used/\n"%(f))
+            localtar_arr = f.split("/")
+            localtar = localtar_arr[len(localtar_arr)-1]
+            ourfile.write("tar xfz %s\n"%(localtar))
+            ourfile.write("cp %s ${CONDOR_DIR_OUTPUT}/Config_Used/\n"%(localtar))
     ourfile.write("echo 'FILES IN OUR DIRECTORY:'\n")
     ourfile.write('ls\n')
     ourfile.write(configdict["MAIN_PROGRAM"])

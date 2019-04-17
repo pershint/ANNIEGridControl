@@ -78,7 +78,7 @@ if __name__=='__main__':
                                           ThisJobfilesDir)
         #Tar up the config
         with tarfile.open(tarname,"w:gz") as tar:
-            tar.add(OUTCONFIGPATH, arcname=os.path.basename(ThisJobfilesDir))
+            tar.add(ThisJobfilesDir, arcname=os.path.basename(ThisJobfilesDir))
         
         #Make a subdirectory in the specified output directory for this job
         thisjobconfig["SUBMISSION_SPECS"]["output_directory"] = \
@@ -93,26 +93,16 @@ if __name__=='__main__':
         jobfilepath = "%s/gridjob_%i.sh"%(ThisJobsScriptsDir,jnum)
         jobsubmitterpath = "%s/jobsubmitter_%i.sh"%(ThisJobsScriptsDir,jnum)
         if ap.args.SETUP is None:
-            #Job script needs local path of tarred text files
-            input_files.append(tarname.replac(ThisJobfilesDir,""))
+            input_files.append(tarname)
             sw.WriteGenericJob(jobfilepath,thisjobconfig,input_files)
-            #Submission script needs full path of tarred text files
-            for j,job in enumerate(input_files):
-                if job.endswith("tar.gz"):
-                    input_files[j] = tarname
             sw.WriteJobSubmission(jobsubmitterpath, jobfilepath,
-                                  thisjobconfig,input_files)
+                                  thisjobconfig)
         elif ap.args.SETUP == "TOOLANALYSISRECO":
             thisjob_input_files = input_files + setup_infiles[jnum]
-            #Job script needs local path
-            thisjob_input_files.append(tarname.replace(ThisJobfilesDir,""))
+            thisjob_input_files.append(tarname)
             sw.WriteTAJob(jobfilepath,thisjobconfig,thisjob_input_files)
-            #Submission script needs full path
-            for j,job in enumerate(thisjob_input_files):
-                if job.endswith("tar.gz"):
-                    thisjob_input_files[j] = tarname
             sw.WriteJobSubmission(jobsubmitterpath, jobfilepath,
-                                  thisjobconfig,thisjob_input_files)
+                                  thisjobconfig)
         if not ap.args.NOSUBMIT:
             #Shoot off the job script now.
             joblogpath = "%s/jobsubmit_log_%i"%(OUTLOGPATH,jnum)

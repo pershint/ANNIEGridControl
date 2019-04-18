@@ -70,30 +70,37 @@ def WriteTAJob(fileloc,configdict,infiles):
           Used to untar ToolAnalysis config files.
     '''
     ourfile = open(fileloc,"w")
-    ourfile.write("source %s\n\n"%(configdict["GRIDSOURCE"]))
-    #ourfile.write("setup ifdhc\n")
+    ourfile.write("#Source some common UPS setups for transferring files\n")
+    ourfile.write("source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups\n")
+    ourfile.write("setup ifdhc\n")
     ourfile.write("setup fife_utils\n")
-    comment1=("#Touch a dummy file in the working directory. \n"+
-              "#This is a hack that helps stalled jobs close faster\n\n")
+    comment1=("\n#Touch a dummy file in the working directory. \n"+
+              "#This is a hack that helps stalled jobs close faster\n")
     ourfile.write(comment1)
     dummyline=("DUMMY_OUTPUT_FILE=${CONDOR_DIR_OUTPUT}/__dummy_output \n")
     ourfile.write(dummyline)
     ourfile.write("touch ${DUMMY_OUTPUT_FILE}\n")
-    #Let's save the configfiles untarred in a directory
-    ourfile.write("mkdir ${CONDOR_DIR_OUTPUT}/Config_Used\n")
     for entry in infiles:
         ourfile.write("ifdh cp -D %s .\n"%(entry))
-    #Untar the file that has all config files in it
+    #Move tarred text files that have replacements into the output dir. for debugging
     for f in infiles:
         if f.endswith("tar.gz"):
             localtar_arr = f.split("/")
             localtar = localtar_arr[len(localtar_arr)-1]
-            ourfile.write("cp %s ${CONDOR_DIR_OUTPUT}/Config_Used/\n"%(localtar))
-            ourfile.write("tar xfz %s\n"%(localtar))
+            ourfile.write("cp %s ${CONDOR_DIR_OUTPUT}/\n"%(localtar))
     #Whatever temp output directory is used, fill it's path into the Config
+    ourfile.write("\n#Source the ANNIE-specific UPS products for running ToolAnalysis\n")
+    ourfile.write("source %s\n\n"%(configdict["GRIDSOURCE"]))
+    #Have to untar after sourcing ANNIE
+    for f in infiles:
+        if f.endswith("tar.gz"):
+            localtar_arr = f.split("/")
+            localtar = localtar_arr[len(localtar_arr)-1]
+            ourfile.write("tar xfz %s\n"%(localtar))
     ourfile.write('sed -i "s|CONDOR_DIR_OUTPUT|${CONDOR_DIR_OUTPUT}|g" *Config\n')
     ourfile.write("echo 'FILES IN OUR DIRECTORY:'\n")
     ourfile.write('ls\n')
+    ourfile.write('\n#Execute main program\n')
     ourfile.write("%s ./ToolChainConfig"%(configdict["MAIN_PROGRAM"]))
     ourfile.close()
 
@@ -114,7 +121,10 @@ def WriteGenericJob(fileloc,configdict,infiles):
           Used to untar ToolAnalysis config files and get any local files needed.
     '''
     ourfile = open(fileloc,"w")
-    ourfile.write("source %s\n\n"%(configdict["GRIDSOURCE"]))
+    ourfile.write("#Source some common UPS setups for transferring files\n")
+    ourfile.write("source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups\n")
+    ourfile.write("setup ifdhc\n")
+    ourfile.write("setup fife_utils\n")
     comment1=("#Touch a dummy file in the working directory. \n"+
               "#This is a hack that helps stalled jobs close faster\n\n")
     ourfile.write(comment1)
@@ -124,15 +134,22 @@ def WriteGenericJob(fileloc,configdict,infiles):
     for entry in infiles:
         ourfile.write("ifdh cp %s .\n"%(entry))
     #Let's save the configfiles untarred in a directory
-    ourfile.write("mkdir ${CONDOR_DIR_OUTPUT}/Config_Used\n")
+    for f in infiles:
+        if f.endswith("tar.gz"):
+            localtar_arr = f.split("/")
+            localtar = localtar_arr[len(localtar_arr)-1]
+            ourfile.write("cp %s ${CONDOR_DIR_OUTPUT}/\n"%(localtar))
+    ourfile.write("#Source the ANNIE-specific UPS products for running ToolAnalysis\n")
+    ourfile.write("source %s\n\n"%(configdict["GRIDSOURCE"]))
+    #Have to untar after sourcing ANNIE
     for f in infiles:
         if f.endswith("tar.gz"):
             localtar_arr = f.split("/")
             localtar = localtar_arr[len(localtar_arr)-1]
             ourfile.write("tar xfz %s\n"%(localtar))
-            ourfile.write("cp %s ${CONDOR_DIR_OUTPUT}/Config_Used/\n"%(localtar))
     ourfile.write("echo 'FILES IN OUR DIRECTORY:'\n")
-    ourfile.write('ls\n')
+    ourfile.write('ls\n\n')
+    ourfile.write('#Execute main program\n')
     ourfile.write(configdict["MAIN_PROGRAM"])
     ourfile.close()
 

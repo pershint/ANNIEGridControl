@@ -62,6 +62,8 @@ if __name__=='__main__':
         replacements,setup_infiles = sp.GetReplacementDicts(ap.args.SETUP,
                                                           ap.args.SETUPINPUTS)
     for jnum,replacement_dict in enumerate(replacements):
+        if (ap.args.MAXJOBS>0 and jnum > ap.args.MAXJOBS):
+            break
         thisjobconfig = copy.deepcopy(mainconfig)
         if ap.args.DEBUG:
             print("REPLACEMENT DICT FOR THIS JOB: " + str(replacement_dict))
@@ -106,4 +108,4 @@ if __name__=='__main__':
         if not ap.args.NOSUBMIT:
             #Shoot off the job script now.
             joblogpath = "%s/jobsubmit_log_%i"%(OUTLOGPATH,jnum)
-            os.system("bash %s > %s"%(jobsubmitterpath,joblogpath))
+            os.system("bash %s > %s & "%(jobsubmitterpath,joblogpath))

@@ -48,9 +48,13 @@ def GetReplacementDicts(ruleInput, *argv):
         input_file_arrays = [] #Holds 2-element arrays with full PMT/LAPPD paths
         for pf in PMTFiles:
             found_LAPPD_match = False
-            pf_split = pf.split("_")
+            split_fullpf = pf.split("/")
+            pf_base = split_fullpf[len(split_fullpf)-1]
+            pf_split = pf_base.split("_")
             for lf in LAPPDFiles:
-                lf_split = lf.split("_")
+                split_fulllf = lf.split("/")
+                lf_base = split_fulllf[len(split_fulllf)-1]
+                lf_split = lf_base.split("_")
                 if pf_split[1] == lf_split[2]:
                     outsuffix = lf_split[2]
                     input_file_arrays.append([pf,lf])

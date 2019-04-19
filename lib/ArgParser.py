@@ -13,6 +13,8 @@ parser.add_argument('-c','--configfile', dest='CONFIG',action='store',type=str,
         help='Path to configuration file used to generate job scripts')
 parser.add_argument('-j','--jobnum', dest='JOBNUM',action='store',type=str,
         help='Specify a job number to append to the output files generated.')
+parser.add_argument('-M','--maxjobs', dest='MAXJOBS',action='store',type=int,
+        help='Maximum number of jobs that will be submitted to the grid.')
 parser.add_argument('-N','--nosubmit', dest='NOSUBMIT',action='store_true',
         help="Do not submit the jobs to the cluster; just write the scripts.")
 parser.add_argument('-r','--resetscripts', dest='RESET',action='store_true',
@@ -36,7 +38,7 @@ parser.add_argument('-S','--setup', dest='SETUP', action='store',type=str,
 
 defcon = "%s/submit_default.json"%(configpath)
 
-parser.set_defaults(DEBUG=False,JOBNUM=0,CONFIG=defcon, RESET=False,KEYINPUT=[],
+parser.set_defaults(DEBUG=False,JOBNUM=0,MAXJOBS=0,CONFIG=defcon, RESET=False,KEYINPUT=[],
                     SETUPINPUTS=[],SETUP=None,FILEINPUT=[])
 args = parser.parse_args()
 

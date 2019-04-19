@@ -1,5 +1,6 @@
 LoadWCSim LoadWCSim ./LoadWCSimConfig
 LoadWCSimLAPPD LoadWCSimLAPPD ./LoadWCSimLAPPDConfig
+MCParticleProperties MCParticleProperties ./MCParticlePropertiesConfig
 #FindMrdTracks FindMrdTracks ./FindMrdTracksConfig
 DigitBuilder DigitBuilder .//DigitBuilderConfig
 EventSelector EventSelector ./EventSelectorConfig

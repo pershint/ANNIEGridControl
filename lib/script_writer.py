@@ -147,6 +147,7 @@ def WriteGenericJob(fileloc,configdict,infiles):
             localtar_arr = f.split("/")
             localtar = localtar_arr[len(localtar_arr)-1]
             ourfile.write("tar xfz %s\n"%(localtar))
+    ourfile.write('sed -i "s|CONDOR_DIR_OUTPUT|${CONDOR_DIR_OUTPUT}|g" *Config\n')
     ourfile.write("echo 'FILES IN OUR DIRECTORY:'\n")
     ourfile.write('ls\n\n')
     ourfile.write('#Execute main program\n')

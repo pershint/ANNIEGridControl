@@ -72,7 +72,6 @@ def GetReplacementDicts(ruleInput, *argv):
                    "datafiles have structure wcsim_(lappd_)N1.N2.N3.root?"))
             return None
         replacement_dicts = [] #Replacements made in each job's Config scripts
-        print("FILEPAIRS ARE: " + str(file_pairs))
         for apair in file_pairs:
             replacement_dict = {}
             replacement_dict[PMT_ReplacementKey] = apair[0]

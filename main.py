@@ -72,7 +72,7 @@ if __name__=='__main__':
             print(("SENDING SINGLE JOB WITH " +
                    "NO REPLACEMENTS MADE TO INPUT FILES"))
             jnum = int(ap.args.JOBNUM)
-
+        print("WRITING SCRIPTS FOR JOB %i"%(jnum))
         ThisJobfilesDir = "%s/jobsubmit_%i/"%(OUTCONFIGPATH,jnum)
         tarname = "%sinputfiles_tar_job_%i.tar.gz"%(ThisJobfilesDir,jnum)
         TASweeper = ts.TextSweeper(scandict=replacement_dict)
@@ -107,5 +107,6 @@ if __name__=='__main__':
                                   thisjobconfig)
         if not ap.args.NOSUBMIT:
             #Shoot off the job script now.
+            print("SUBMITTING JOB %i"%(jnum))
             joblogpath = "%s/jobsubmit_log_%i"%(OUTLOGPATH,jnum)
             os.system("bash %s > %s & "%(jobsubmitterpath,joblogpath))

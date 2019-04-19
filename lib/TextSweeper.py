@@ -1,6 +1,7 @@
 import json
 import glob
 import os
+import ArgParser as ap
 
 class TextSweeper(object):
     '''
@@ -47,8 +48,10 @@ class TextSweeper(object):
         if not os.path.exists(outfiledir):
             os.mkdir(outfiledir)
         infiles = glob.glob("%s/*"%(infiledir))
-        print("INFILEDIR: %s"%(infiledir))
+        if ap.args.DEBUG:
+            print("INFILEDIR: %s"%(infiledir))
         for fi in infiles:
             infiletail = fi.replace(infiledir,"")
-            print("INFILETAIL: %s"%(infiletail))
+            if ap.args.DEBUG:
+                print("INFILETAIL: %s"%(infiletail))
             self.ReplaceInFile(fi,"%s/%s"%(outfiledir,infiletail))

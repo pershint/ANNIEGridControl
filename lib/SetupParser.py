@@ -4,7 +4,7 @@
 
 import glob
 
-def GetReplacementDicts(ruleInput, *argv):
+def GetReplacementDicts(ruleInput, setuplog, *argv):
     '''
     Given a rule input ,
     will produce an array of replacements to make to help produce all configuration
@@ -13,6 +13,10 @@ def GetReplacementDicts(ruleInput, *argv):
         ruleInput string
             Setup string given on program execution that indicates what setup of
             ANNIEGridControl is being executed.
+        setuplog JobLogger
+            JobLogger class that has the index list of what files have already been
+            processed before.  Used to ignore any PMT/LAPPD file pairs that have
+            been analyzed already.
         *argv
             Any additional inputs necessary to form the dictionaries used to make
             replacements in input text files (specific to rule: see README for 
@@ -55,7 +59,9 @@ def GetReplacementDicts(ruleInput, *argv):
                 split_fulllf = lf.split("/")
                 lf_base = split_fulllf[len(split_fulllf)-1]
                 lf_split = lf_base.split("_")
-                if pf_split[1] == lf_split[2]:
+                fileindexnum = lf_split[2].replace(".root","")
+                if pf_split[1] == lf_split[2] and not setuplog.indexexists(fileindexnum):
+                    setuplog.addindextolog(fileindexnum)
                     outsuffix = lf_split[2]
                     input_file_arrays.append([pf,lf])
                     apair = [pf.replace(PMT_DataDir,""),

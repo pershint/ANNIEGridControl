@@ -8,6 +8,7 @@ import lib.ArgParser as ap
 import lib.TextSweeper as ts
 import lib.script_writer as sw
 import lib.SetupParser as sp #Controls location to save output fit results
+import lib.JobLogger as jl
 
 BASEPATH = os.path.dirname(__file__)
 CONFIGPATH = os.path.abspath(os.path.join(BASEPATH, "config"))
@@ -58,9 +59,22 @@ if __name__=='__main__':
     #Prepare any replacements to be made in the input files
     #Or configuration files for each job.
     replacements = [{}] #Key/value replacements to make
+    IndexLogPath = "%s/%s_ProcHistory.json"%(OUTLOGPATH,ap.args.SETUP)
     if ap.args.SETUP is not None:
+        if DEBUG:
+            if not os.path.exists(IndexLogPath):
+                print(("No processing history found for setup " + 
+                      ap.args.SETUP))
+            else:
+                print(("Files have been processed before for setup " +
+                       ap.args.SETUP))
+        ourJobLogger = jl.JobLogger()
+        ourJobLogger.loadlog(IndexLogPath)
+        ourJobLogger.showlogfile()
         replacements,setup_infiles = sp.GetReplacementDicts(ap.args.SETUP,
-                                                          ap.args.SETUPINPUTS)
+                                                            ourJobLogger,
+                                                            ap.args.SETUPINPUTS)
+        ourJobLogger.showlogfile()
     for jnum,replacement_dict in enumerate(replacements):
         if (ap.args.MAXJOBS>0 and jnum > ap.args.MAXJOBS):
             break
@@ -110,3 +124,6 @@ if __name__=='__main__':
             print("SUBMITTING JOB %i"%(jnum))
             joblogpath = "%s/jobsubmit_log_%i"%(OUTLOGPATH,jnum)
             os.system("bash %s > %s & "%(jobsubmitterpath,joblogpath))
+        
+    #Successfully wrote/submitted jobs.  Clean up
+    ourJobLogger.savelog(IndexLogPath)

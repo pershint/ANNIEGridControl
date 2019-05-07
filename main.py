@@ -61,7 +61,7 @@ if __name__=='__main__':
     replacements = [{}] #Key/value replacements to make
     IndexLogPath = "%s/%s_ProcHistory.json"%(OUTLOGPATH,ap.args.SETUP)
     if ap.args.SETUP is not None:
-        if DEBUG:
+        if ap.args.DEBUG:
             if not os.path.exists(IndexLogPath):
                 print(("No processing history found for setup " + 
                       ap.args.SETUP))

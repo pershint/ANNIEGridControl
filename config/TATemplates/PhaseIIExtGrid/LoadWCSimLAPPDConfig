@@ -1,7 +1,7 @@
 #LoadWCSimLAPPD Config File
 # all variables retrieved with m_variables.Get() must be defined here!
 
-verbose 3
+verbose 1
 InputFile INPUT_FILE_LAPPD
 WCSimVersion 4               ## should reflect the WCSim version of the files being loaded
 # octagonal inner structure radius in m (from drawings 106.64")

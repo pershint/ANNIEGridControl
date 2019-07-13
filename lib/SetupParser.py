@@ -41,12 +41,15 @@ def GetReplacementDicts(ruleInput, setuplog, *argv):
         prePMTFiles = glob.glob("%s/*.root"%(PMT_DataDir))
         PMTFiles=[]
         for p in prePMTFiles:
-            if p.find("lappd")==-1:
+            p_file = p.split("/")[-1]
+            if p_file.find("lappd")==-1:
                 PMTFiles.append(p)
+        print(PMTFiles)
         preLAPPDFiles = glob.glob("%s/*.root"%(LAPPD_DataDir))
         LAPPDFiles=[]
         for p in preLAPPDFiles:
-            if p.find("lappd")!=-1:
+            p_file = p.split("/")[-1]
+            if p_file.find("lappd")!=-1:
                 LAPPDFiles.append(p)
         file_pairs = []
         input_file_arrays = [] #Holds 2-element arrays with full PMT/LAPPD paths
